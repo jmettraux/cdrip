@@ -87,7 +87,7 @@ tracks
         system("mv track#{t[:n2]}.wav #{t[:fn]}.wav")
       end
     else
-      puts "#{t[:fn]}.wav"
+      puts "#{t[:fn][0, 250]}.wav"
     end }
   .each { |t|
 
