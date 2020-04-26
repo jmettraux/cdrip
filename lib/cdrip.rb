@@ -70,11 +70,12 @@ tracks = tracks.select { |t| t[:n] <= c }
 tracks
   .each { |t|
 
-    w = File.exist?("#{t[:fn]}.wav")
-    f0 = File.exist?("#{t[:fn]}.flac")
-    f1 = File.exist?("#{t[:pa]}.flac")
-
     if wet
+
+      w = File.exist?("#{t[:fn]}.wav")
+      f0 = File.exist?("#{t[:fn]}.flac")
+      f1 = File.exist?("#{t[:pa]}.flac")
+
       unless w || f0 || f1
         system("cdio cdrip #{t[:n]}")
         system("chmod go+r track#{t[:n2]}.wav")
@@ -86,14 +87,17 @@ tracks
     end }
   .each { |t|
 
-    f0 = File.exist?("#{t[:fn]}.flac")
-    f1 = File.exist?("#{t[:pa]}.flac")
-
     if wet
+
+      f0 = File.exist?("#{t[:fn]}.flac")
+      f1 = File.exist?("#{t[:pa]}.flac")
+
       unless f0 || f1
         system("flac #{t[:fn]}.wav")
         system("rm #{t[:fn]}.wav")
       end
-      system("mv #{t[:fn]}.flac #{t[:pa]}.flac") unless f1
+      unless f1
+        system("mv #{t[:fn]}.flac #{t[:pa]}.flac")
+      end
     end }
 
