@@ -2,30 +2,41 @@
 
 require 'pp'
 
-info = `cdio cddbinfo`.split("\n")
+opts, args = ARGV.partition { |a| a.match(/^-/) }
 
-# ["Anton Batagov / Die Kunst der Fuga CD1(classical)",
-#  "-------------------------------------------------",
-#  "    1   5:20.60  Contrapunctus 1",
-#  "    2   5:45.65  Contrapunctus 2",
-#  "    3   4:57.68  Contrapunctus 3",
-#  "    4   9:21.50  Contrapunctus 4",
-#  "    5   6:09.62  Contrapunctus 5",
-#  "    6   5:29.68  Contrapunctus 6",
-#  "    7   4:15.57  Contrapunctus 7",
-#  "    8  12:36.50  Contrapunctus 8",
-#  "    9   8:48.55  Contrapunctus 9",
-#  "   10   7:25.23  Canon per Augmentationem in Contrario Motu",
-#  "   11   4:34.00  Canon alla Ottava",
-#  "  170  74:48.33  "]
+info =
+  if opts.include?('--override-db')
+    File.read('dbinfo.txt')
+  else
+    `cdio cddbinfo`
+  end
+    .split("\n")
+
+if opts.include?('--dump-db')
+  puts info.join("\n")
+  exit 0
+end
+
+# Anton Batagov / Die Kunst der Fuga CD1(classical)
+# -------------------------------------------------
+#     1   5:20.60  Contrapunctus 1
+#     2   5:45.65  Contrapunctus 2
+#     3   4:57.68  Contrapunctus 3
+#     4   9:21.50  Contrapunctus 4
+#     5   6:09.62  Contrapunctus 5
+#     6   5:29.68  Contrapunctus 6
+#     7   4:15.57  Contrapunctus 7
+#     8  12:36.50  Contrapunctus 8
+#     9   8:48.55  Contrapunctus 9
+#    10   7:25.23  Canon per Augmentationem in Contrario Motu
+#    11   4:34.00  Canon alla Ottava
+#   170  74:48.33
 
 def neuter(s)
   s.strip.gsub(/[^a-zA-Z0-9]/, '_')
 end
 
 ad = info[0].split('/', 2)
-
-opts, args = ARGV.partition { |a| a.match(/^-/) }
 
 artist = neuter(args[0] || ad[0])
 disc = neuter(args[1] || ad[1])
