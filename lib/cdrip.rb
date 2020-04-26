@@ -52,9 +52,10 @@ tracks = info[2..-1]
       n = m[1].to_i
       n2 = '%02d' % m[1].to_i
       d = m[2]
-      d2 = d.gsub(':', 'h').gsub('.', 'm') + 's'
+      d2 = d.gsub(':', 'm').gsub('.', 's')
+      d2 = '_' + d2 if d2.length < 8
       t = m[3].strip
-      fn = [ artist, disc, n2, neuter(t) ].join('__')
+      fn = [ artist, disc, n2, d2, neuter(t) ].join('__')
       pa = File.join(artist, disc, fn)
       { n: n, n2: n2, d: d, d2: d2, t: t, fn: fn, pa: pa }
     else
@@ -64,7 +65,7 @@ tracks = info[2..-1]
 
 c = tracks.count
 tracks = tracks.select { |t| t[:n] <= c }
-pp tracks
+#pp tracks
 
 tracks
   .each { |t|
@@ -85,8 +86,14 @@ tracks
     end }
   .each { |t|
 
+    f0 = File.exist?("#{t[:fn]}.flac")
+    f1 = File.exist?("#{t[:pa]}.flac")
+
     if wet
-      system("flac #{t[:fn]}.wav") unless f0 || f1
+      unless f0 || f1
+        system("flac #{t[:fn]}.wav")
+        system("rm #{t[:fn]}.wav")
+      end
       system("mv #{t[:fn]}.flac #{t[:pa]}.flac") unless f1
     end }
 
