@@ -6,5 +6,5 @@ My script for ripping CDs on OpenBSD.
 
 ## license
 
-MIT (see LICENSE.txt)
+MIT (see [LICENSE.txt](LICENSE.txt))
 
