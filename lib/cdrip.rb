@@ -2,7 +2,7 @@
 
 require 'pp'
 
-lines = `cdio cddbinfo`.split("\n")
+info = `cdio cddbinfo`.split("\n")
 
 # ["Anton Batagov / Die Kunst der Fuga CD1(classical)",
 #  "-------------------------------------------------",
@@ -23,12 +23,27 @@ def neuter(s)
   s.strip.gsub(/[^a-zA-Z0-9]/, '_')
 end
 
-ad = lines[0].split('/', 2)
+ad = info[0].split('/', 2)
 
-artist = neuter(ARGV[0] || ad[0])
-disc = neuter(ARGV[1] || ad[1])
+opts, args = ARGV.partition { |a| a.match(/^-/) }
 
-tracks = lines[2..-1]
+artist = neuter(args[0] || ad[0])
+disc = neuter(args[1] || ad[1])
+
+wet = ! opts.include?('--dry')
+
+#
+# go
+
+if wet
+  system("mkdir -p #{artist}/#{disc}/")
+  system("chmod g+w #{artist}/")
+  system("chmod go+r #{artist}/")
+  system("chmod g+w #{artist}/#{disc}/")
+  system("chmod go+r #{artist}/#{disc}/")
+end
+
+tracks = info[2..-1]
   .collect { |l|
     m = l.match(/^ *(\d+) +([0-9:.]+) +(.+)$/)
     m ?
@@ -43,11 +58,20 @@ tracks = tracks.select { |t| t[:n] <= c }
 tracks
   .each do |t|
 
-    fn = [ artist, disc, t[:n2], t[:d], neuter(t[:t]) ].join('__')
+    fn = [ artist, disc, t[:n2], neuter(t[:t]) ].join('__')
 
-    system("cdio cdrip #{t[:n]}")
-    system("chmod go+r track#{t[:n2]}.wav")
-    system("chmod g+w track#{t[:n2]}.wav")
-    system("mv track#{t[:n2]}.wav #{fn}.wav")
+    if wet
+      unless File.exist?("#{fn}.wav")
+        system("cdio cdrip #{t[:n]}")
+        system("chmod go+r track#{t[:n2]}.wav")
+        system("chmod g+w track#{t[:n2]}.wav")
+        system("mv track#{t[:n2]}.wav #{fn}.wav")
+      end
+      #system("flac --keep-foreign-metadata #{fn}.wav")
+      system("flac #{fn}.wav")
+      system("mv #{fn}.flac #{artist}/#{disc}/#{fn}.flac")
+    else
+      puts "#{fn}.wav"
+    end
   end
 
