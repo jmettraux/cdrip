@@ -41,37 +41,52 @@ if wet
   system("chmod go+r #{artist}/")
   system("chmod g+w #{artist}/#{disc}/")
   system("chmod go+r #{artist}/#{disc}/")
+  File.open("#{artist}/#{disc}/#{artist}__#{disc}__info.txt", "wb") do |f|
+    f.write(info.join("\n"))
+  end
 end
 
 tracks = info[2..-1]
   .collect { |l|
-    m = l.match(/^ *(\d+) +([0-9:.]+) +(.+)$/)
-    m ?
-      { n: m[1].to_i, n2: '%02d' % m[1].to_i, d: m[2], t: m[3].strip } :
-      nil }
+    if m = l.match(/^ *(\d+) +([0-9:.]+) +(.+)$/)
+      n = m[1].to_i
+      n2 = '%02d' % m[1].to_i
+      d = m[2]
+      d2 = d.gsub(':', 'h').gsub('.', 'm') + 's'
+      t = m[3].strip
+      fn = [ artist, disc, n2, neuter(t) ].join('__')
+      pa = File.join(artist, disc, fn)
+      { n: n, n2: n2, d: d, d2: d2, t: t, fn: fn, pa: pa }
+    else
+      nil
+    end }
   .compact
 
 c = tracks.count
-
 tracks = tracks.select { |t| t[:n] <= c }
+pp tracks
 
 tracks
-  .each do |t|
+  .each { |t|
 
-    fn = [ artist, disc, t[:n2], neuter(t[:t]) ].join('__')
+    w = File.exist?("#{t[:fn]}.wav")
+    f0 = File.exist?("#{t[:fn]}.flac")
+    f1 = File.exist?("#{t[:pa]}.flac")
 
     if wet
-      unless File.exist?("#{fn}.wav")
+      unless w || f0 || f1
         system("cdio cdrip #{t[:n]}")
         system("chmod go+r track#{t[:n2]}.wav")
         system("chmod g+w track#{t[:n2]}.wav")
-        system("mv track#{t[:n2]}.wav #{fn}.wav")
+        system("mv track#{t[:n2]}.wav #{t[:fn]}.wav")
       end
-      #system("flac --keep-foreign-metadata #{fn}.wav")
-      system("flac #{fn}.wav")
-      system("mv #{fn}.flac #{artist}/#{disc}/#{fn}.flac")
     else
-      puts "#{fn}.wav"
-    end
-  end
+      puts "#{t[:fn]}.wav"
+    end }
+  .each { |t|
+
+    if wet
+      system("flac #{t[:fn]}.wav") unless f0 || f1
+      system("mv #{t[:fn]}.flac #{t[:pa]}.flac") unless f1
+    end }
 
