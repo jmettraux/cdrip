@@ -48,17 +48,21 @@ end
 
 tracks = info[2..-1]
   .collect { |l|
+
     if m = l.match(/^ *(\d+) +([0-9:.]+) +(.+)$/)
+
       n = m[1].to_i
       n2 = '%02d' % m[1].to_i
       d = m[2]
       d2 = d.gsub(':', 'm').gsub('.', 's')
       d2 = '_' + d2 if d2.length < 8
       t = m[3].strip
-      fn = [ artist, disc, n2, d2, neuter(t) ].join('__')
+      fn = [ artist, disc, n2, d2, neuter(t) ].join('__')[0, 250] # '.flac'
       pa = File.join(artist, disc, fn)
+
       { n: n, n2: n2, d: d, d2: d2, t: t, fn: fn, pa: pa }
     else
+
       nil
     end }
   .compact
