@@ -33,7 +33,10 @@ end
 #   170  74:48.33
 
 def neuter(s)
-  s.strip.gsub(/[^a-zA-Z0-9]/, '_')
+  s = s.strip.gsub(/[^a-zA-Z0-9]/, '_')
+  s = s[1..-1] while s[0, 1] == '_'
+  s = s[0..-2] while s[-1, 1] == '_'
+  s
 end
 
 ad = info[0].split('/', 2)
