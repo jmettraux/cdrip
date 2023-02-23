@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby25
+#!/usr/local/bin/ruby31
 
 require 'pp'
 
