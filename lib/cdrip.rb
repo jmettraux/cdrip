@@ -17,6 +17,12 @@ if opts.include?('--dump-db')
   exit 0
 end
 
+if opts.include?('--make-db')
+  system('cdio cddbinfo > dbinfo.txt')
+  system('cdio info >> dbinfo.txt')
+  exit 0
+end
+
 # Anton Batagov / Die Kunst der Fuga CD1(classical)
 # -------------------------------------------------
 #     1   5:20.60  Contrapunctus 1
