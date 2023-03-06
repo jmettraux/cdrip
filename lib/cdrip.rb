@@ -117,7 +117,7 @@ tracks
       f1 = File.exist?("#{t[:pa]}.flac")
 
       unless f0 || f1
-        system("flac #{t[:fn]}.wav")
+        system("flac --verify #{t[:fn]}.wav")
         system("rm #{t[:fn]}.wav")
       end
       unless f1
